@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Transaction</title>
+    <style>
+        body {
+            background-color: #2c3e50; /* Dark shade background */
+            color: #ecf0f1;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+        }
+        #balance {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            color: gold;
+        }
+        #transactionForm {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%; /* Adjusted width for the "Max" button */
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            display: inline-block;
+            background: black;
+            color: white;
+        }
+        button {
+            margin-bottom: 10px;
+            background-color: #3498db;
+            color: #ecf0f1;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        #maxButton {
+            width: 40px;
+            display: inline-block;
+            vertical-align: top;
+            color: salmon;
+        }
+        #countdown {
+            margin-top: 20px;
+            font-size: 18px;
+            width: 100%;
+        }
+        #error {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>$USD Transfers</h1>
+
+<label>Balance:</label>
+<b id="balance" href="#">$1000</b>
+<div id="transactionForm">
+    <label for="value">Value:</label>
+    <div id="amountDisplay"></div>
+    <button onclick="cancelTransaction()">Cancel</button>
+    <button onclick="boostTransaction()">Boost</button>
+</div>
+<label for="amount">Amount: <a id="maxButton" onclick="fillMaxAmount()">Max</a></label>
+<input type="number" id="amount" name="amount" required>
+<label for="receiver">Enter receiver Address</label>
+<input type="text" id="receiver" name="receiver" required>
+<button onclick="processTransaction()">Process</button>
+<div id="countdown"></div>
+<div id="error"></div>
+<script>
+    var countdownInterval;
+
+    function processTransaction() {
+        var amount = document.getElementById("amount").value;
+        var receiver = document.getElementById("receiver").value;
+
+        // Check if both input fields are filled
+        if (amount === "" || receiver === "") {
+            document.getElementById("error").innerHTML = "Both fields must be filled.";
+            return;
+        }
+
+        // Check if the amount is greater than the balance
+        var currentBalance = parseInt(document.getElementById("balance").innerHTML.substring(1), 10);
+        if (parseInt(amount, 10) > currentBalance) {
+            document.getElementById("error").innerHTML = "Insufficient funds.";
+            return;
+        }
+
+        // Clear any previous error messages
+        document.getElementById("error").innerHTML = "";
+
+        // Display the transaction form
+        document.getElementById("transactionForm").style.display = "block";
+        document.getElementById("amountDisplay").innerHTML = "$" + amount;
+
+        // Start the countdown timer
+        var countdown = 20; // 2 minutes in seconds
+        countdownInterval = setInterval(function () {
+            document.getElementById("countdown").innerHTML = "Time left: " + countdown + " seconds";
+
+            if (countdown <= 0) {
+                // Subtract the amount from the balance after the countdown
+                deductAmountFromBalance(amount);
+
+                // Reset and hide the transaction form
+                resetTransactionForm();
+
+                // Show transaction successful alert
+                showTransactionSuccessAlert();
+
+                clearInterval(countdownInterval);
+            } else {
+                countdown--;
+            }
+        }, 1000);
+    }
+
+    function showTransactionSuccessAlert() {
+        alert("☑️ Transaction successful");
+    }
+
+    function cancelTransaction() {
+        // Reset and hide the transaction form
+        resetTransactionForm();
+
+        // Clear the countdown interval
+        // Clear the countdown interval
+        clearInterval(countdownInterval);
+        document.getElementById("countdown").innerHTML = "";
+
+        // Clear any previous error messages
+        document.getElementById("error").innerHTML = "";
+    }
+
+    function boostTransaction() {
+        var amount = document.getElementById("amount").value;
+
+        // Subtract the amount immediately from the balance
+        deductAmountFromBalance(amount);
+
+        // Reset and hide the transaction form
+        resetTransactionForm();
+
+        // Clear the countdown interval
+        clearInterval(countdownInterval);
+        document.getElementById("countdown").innerHTML = "";
+
+        // Clear any previous error messages
+        document.getElementById("error").innerHTML = "";
+
+        // Show transaction successful alert
+        showTransactionSuccessAlert();
+    }
+
+    function deductAmountFromBalance(amount) {
+        var currentBalance = parseInt(document.getElementById("balance").innerHTML.substring(1), 10);
+        var newBalance = currentBalance - parseInt(amount, 10);
+        document.getElementById("balance").innerHTML = "$" + newBalance;
+    }
+
+    function resetTransactionForm() {
+        // Hide the transaction form
+        document.getElementById("transactionForm").style.display = "none";
+
+        // Clear the amount display
+        document.getElementById("amountDisplay").innerHTML = "";
+
+        // Clear input fields
+        document.getElementById("amount").value = "";
+        document.getElementById("receiver").value = "";
+    }
+
+    function fillMaxAmount() {
+        var maxAmount = parseInt(document.getElementById("balance").innerHTML.substring(1), 10);
+        document.getElementById("amount").value = maxAmount;
+    }
+</script>
+</body>
+</html>
